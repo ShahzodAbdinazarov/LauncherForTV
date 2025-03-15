@@ -12,6 +12,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val _isHideBackground = MutableStateFlow(false)
+    val isHideBackground = _isHideBackground.asStateFlow()
+
+    fun setHideBackground(isHide: Boolean) {
+        viewModelScope.launch {
+            _isHideBackground.value = isHide
+        }
+    }
+
     private val repository = AppRepository(application)
     private val _installedApps = MutableStateFlow<List<AppModel>>(emptyList())
     val installedApps: StateFlow<List<AppModel>> = _installedApps.asStateFlow()
@@ -20,8 +30,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch {
-            repository.getInstalledApps().collect {
-                _installedApps.value = it
+            repository.getInstalledApps().collect { apps ->
+                val filteredApps = apps.filter { it.packageName != appContext.packageName }
+                _installedApps.value = filteredApps
             }
         }
     }
