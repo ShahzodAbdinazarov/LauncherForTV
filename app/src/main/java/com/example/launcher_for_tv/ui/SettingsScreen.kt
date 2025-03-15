@@ -46,7 +46,7 @@ fun SettingsScreen(
             Button(onClick = {
                 onSettingOpened.invoke()
             }) {
-                Text("Launcher’ni almashtirish")
+                Text("Change Launcher")
             }
         }
     }
