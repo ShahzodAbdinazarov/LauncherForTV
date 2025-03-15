@@ -1,12 +1,12 @@
 package com.example.launcher_for_tv.ui
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -25,7 +25,7 @@ import androidx.core.graphics.createBitmap
 import com.example.launcher_for_tv.R
 import com.example.launcher_for_tv.data.AppModel
 
-@RequiresApi(Build.VERSION_CODES.O)
+@SuppressLint("NewApi")
 @Composable
 fun AppItem(app: AppModel, onClick: (String) -> Unit) {
     Column(

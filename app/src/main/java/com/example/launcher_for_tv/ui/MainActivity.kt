@@ -11,25 +11,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.launcher_for_tv.ui.theme.LauncherForTVTheme
 import com.example.launcher_for_tv.utils.DefaultLauncherHelper
 import com.example.launcher_for_tv.viewmodel.AppViewModel
@@ -49,6 +41,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             var isDarkTheme by rememberSaveable { mutableStateOf(false) }
             val isHideBackground by viewModel.isHideBackground.collectAsState()
+            val currentScreen by viewModel.currentScreen.collectAsState()
 
             LauncherForTVTheme(isInDarkTheme = isDarkTheme) {
                 MyLauncherApp(
@@ -58,7 +51,8 @@ class MainActivity : ComponentActivity() {
                         startActivity(intent)
                         viewModel.setHideBackground(true)
                     },
-                    isHideBackground = isHideBackground
+                    isHideBackground = isHideBackground,
+                    currentScreen = currentScreen
                 )
             }
         }
@@ -73,7 +67,9 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        return if (keyCode == KeyEvent.KEYCODE_HOME || keyCode == KeyEvent.KEYCODE_BACK) {
+        return if ((keyCode == KeyEvent.KEYCODE_HOME || keyCode == KeyEvent.KEYCODE_BACK)
+            && viewModel.currentScreen.value == Screen.Home
+        ) {
             // Home and back buttons are blocked
             true
         } else {
@@ -91,43 +87,26 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyLauncherApp(
     onSettingOpened: () -> Unit,
-    isHideBackground: Boolean = false
+    isHideBackground: Boolean = false,
+    currentScreen: Screen,
+    viewModel: AppViewModel = hiltViewModel()
 ) {
-    var currentScreen by remember { mutableStateOf(Screen.Home) }
 
     Column {
         if (isHideBackground) {
             Box(modifier = Modifier.background(Color.Black))
         } else {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text("My Launcher") },
-                        actions = {
-                            IconButton(onClick = { currentScreen = Screen.Settings }) {
-                                Icon(
-                                    imageVector = Icons.Default.Settings,
-                                    contentDescription = "Settings"
-                                )
-                            }
-                        }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
+                when (currentScreen) {
+                    Screen.Home -> HomeScreen({ viewModel.setCurrentScreen(Screen.Settings) })
+                    Screen.Settings -> SettingsScreen(
+                        onBack = { viewModel.setCurrentScreen(Screen.Home) },
+                        onSettingOpened = onSettingOpened
                     )
-                },
-                containerColor = MaterialTheme.colorScheme.background
-            ) { padding ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                        .padding(padding)
-                ) {
-                    when (currentScreen) {
-                        Screen.Home -> HomeScreen()
-                        Screen.Settings -> SettingsScreen(
-                            onBack = { currentScreen = Screen.Home },
-                            onSettingOpened = onSettingOpened
-                        )
-                    }
                 }
             }
         }

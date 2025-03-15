@@ -6,12 +6,22 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.launcher_for_tv.data.AppModel
 import com.example.launcher_for_tv.data.AppRepository
+import com.example.launcher_for_tv.ui.Screen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val _currentScreen = MutableStateFlow(Screen.Home)
+    val currentScreen = _currentScreen.asStateFlow()
+
+    fun setCurrentScreen(currentScreen: Screen) {
+        viewModelScope.launch {
+            _currentScreen.value = currentScreen
+        }
+    }
 
     private val _isHideBackground = MutableStateFlow(false)
     val isHideBackground = _isHideBackground.asStateFlow()
